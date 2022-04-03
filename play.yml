@@ -16,7 +16,7 @@
 
   - name: Upload CA cert
     ansible.builtin.copy:
-      src: config/pki/cacert.pem 
+      src: pki/cacert.pem 
       dest: /etc/openvpn/server/ca.crt
       owner: root
       group: root
@@ -24,7 +24,7 @@
 
   - name: Upload CA key
     ansible.builtin.copy:
-      src: config/pki/cakey.pem
+      src: pki/cakey.pem
       dest: /etc/openvpn/server/ca.key
       owner: root
       group: root
@@ -32,7 +32,7 @@
 
   - name: Upload openvpn cert
     ansible.builtin.copy:
-      src: config/pki/servercert.pem
+      src: pki/servercert.pem
       dest: /etc/openvpn/server/server.crt
       owner: root
       group: root
@@ -40,7 +40,7 @@
 
   - name: Upload openvpn key
     ansible.builtin.copy:
-      src: config/pki/serverkey.pem
+      src: pki/serverkey.pem
       dest: /etc/openvpn/server/server.key
       owner: root
       group: root
@@ -52,7 +52,7 @@
       chdir: /etc/openvpn/server
       creates: /etc/openvpn/server/dh2048.pem
 
-  - name: Write the openvpn cpnfig file
+  - name: Write the openvpn config file
     ansible.builtin.template:
       src: server.conf.j2
       dest: /etc/openvpn/server/server.conf
