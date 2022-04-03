@@ -1,0 +1,2 @@
+
+student    ALL=(student:vpn-self-service) NOPASSWD: /usr/local/bin/ca.py -u

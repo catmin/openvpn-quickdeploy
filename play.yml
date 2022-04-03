@@ -9,6 +9,12 @@
       name: openvpn
       state: latest
 
+  - name: Add the user 'vpn-self-service'
+    ansible.builtin.user:
+      name: vpn-self-service
+      group: vpn-self-service
+      home: /etc/openvpn/server/
+
   - name: Write the openvpn config file
     ansible.builtin.template:
       src: server.conf.j2
@@ -19,7 +25,7 @@
       src: pki/cacert.pem 
       dest: /etc/openvpn/server/ca.crt
       owner: root
-      group: root
+      group: vpn-self-service
       mode: '0644'
 
   - name: Upload CA key
@@ -27,8 +33,8 @@
       src: pki/cakey.pem
       dest: /etc/openvpn/server/ca.key
       owner: root
-      group: root
-      mode: '0600'
+      group: vpn-self-service
+      mode: '0660'
 
   - name: Upload openvpn cert
     ansible.builtin.copy:
@@ -56,6 +62,19 @@
     ansible.builtin.template:
       src: server.conf.j2
       dest: /etc/openvpn/server/server.conf
+
+  - name: sudoers vpn-self-service 
+    ansible.builtin.template:
+      src: sudoers
+      dest: /etc/sudoers.d/vpn-self-service
+
+  - name: install 'ca.py'
+    ansible.builtin.copy:
+      src: ca.py 
+      dest: /usr/local/bin/ca.py
+      owner: root
+      group: root
+      mode: '0755'
 
   - name: Write the nat script file
     ansible.builtin.template:

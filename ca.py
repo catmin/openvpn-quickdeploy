@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import sys, getopt
 import random, string
@@ -5,6 +6,12 @@ from OpenSSL import crypto, SSL
 import os 
 
 class FileStore:
+
+    ca_cert_path = "ca.crt"
+    ca_key_path = "ca.key"
+    server_cert_path = "server.crt"
+    server_key_path = "server.key"
+
 
     def __init__(self, target_dir=None):
         self.target_dir = target_dir
@@ -29,12 +36,12 @@ class FileStore:
         return serial
 
     def set_serial(self, serial):
-        open(self.get_abs_path("serial"), 'w').write(str(serial))
+        open(self.get_abs_path("aerial"), 'w').write(str(serial))
 
 
     def store_ca(self, cert, key):
-        cacert_path = self.get_abs_path("cacert.pem") 
-        cakey_path = self.get_abs_path("cakey.pem") 
+        cacert_path = self.get_abs_path(self.ca_cert_path) 
+        cakey_path = self.get_abs_path(self.ca_key_path) 
         with open(cacert_path, 'wb') as certificate:
             certificate.write(self.get_cert_pem(cert))
         with open(cakey_path, 'wb') as privatekey:
@@ -42,15 +49,15 @@ class FileStore:
         return cert, key
 
     def get_ca(self):
-        cert_path = self.get_abs_path("cacert.pem") 
-        key_path = self.get_abs_path("cakey.pem") 
+        cert_path = self.get_abs_path(self.ca_cert_path) 
+        key_path = self.get_abs_path(self.ca_key_path) 
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(cert_path).read())
         key = crypto.load_privatekey(crypto.FILETYPE_PEM, open(key_path).read())
         return cert, key
 
     def store_server_cert(self, cert, key):
-        cert_path = self.get_abs_path("servercert.pem".format(cert.get_serial_number())) 
-        key_path = self.get_abs_path("serverkey.pem".format(cert.get_serial_number())) 
+        cert_path = self.get_abs_path(self.server_cert_path.format(cert.get_serial_number())) 
+        key_path = self.get_abs_path(self.server_key_path.format(cert.get_serial_number())) 
         with open(cert_path, 'wb') as certificate:
             certificate.write(self.get_cert_pem(cert))
         with open(key_path, 'wb') as privatekey:
@@ -102,14 +109,14 @@ class OpenVpnCa:
     # default signing algorithm
     SIGN_ALGO = "sha256"
     # initial serial
-    INIT_SERIAL = 1000
+    # INIT_SERIAL = 1000
 
     def __init__(self, create_new=False):
-        store = FileStore("pki")
+        store = FileStore("/etc/openvpn/server/")
         self.store = store 
         if create_new:
 
-            self.serial = self.INIT_SERIAL
+            #self.serial = self.INIT_SERIAL
             self.create_ca_cert()
         else:
             self.load_ca_from_store(store)
@@ -118,19 +125,20 @@ class OpenVpnCa:
     def load_ca_from_store(self, store):
         # get ca cert from store
         cert, key = store.get_ca()
-        serial = store.get_serial()
+        #serial = store.get_serial()
         # assign to object
         self.ca_cert = cert
         self.ca_key = key
-        self.serial = serial
+        #self.serial = serial
         return cert, key 
 
     def get_next_serial_nr(self):
         #print("serial is {0}".format(self.serial))
-        self.serial += 1 
+        #self.serial += 1 
         #TODO save serial?
-        self.store.set_serial(self.serial)
-        return self.serial
+        #self.store.set_serial(self.serial)
+        #return self.serial
+        return random.getrandbits(48) 
         
     def gen_key(self, bits_len):
         """
