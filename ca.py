@@ -82,8 +82,8 @@ verb 4
 </key>
     """.format(ca_cert_pem.decode("utf-8"), cert_pem.decode("utf-8"), key_pem.decode("utf-8"))
         print(ovpn_template)
-        with open("x", "w") as f:
-            f.write(ovpn_template)
+        #with open("x", "w") as f:
+        #    f.write(ovpn_template)
 
 
 class OpenVpnCa:
@@ -126,7 +126,7 @@ class OpenVpnCa:
         return cert, key 
 
     def get_next_serial_nr(self):
-        print("serial is {0}".format(self.serial))
+        #print("serial is {0}".format(self.serial))
         self.serial += 1 
         #TODO save serial?
         self.store.set_serial(self.serial)
@@ -239,7 +239,7 @@ def create_server_cert(fqdn):
     ca = OpenVpnCa()
     ca.create_server_cert(fqdn)
 
-def create_client_cert(cn):
+def create_client_cert(outfile):
     ca = OpenVpnCa()
     ca_cert, ca_key = ca.get_ca_cert()
     cn = ''.join(random.choice(string.ascii_letters) for i in range(20))
