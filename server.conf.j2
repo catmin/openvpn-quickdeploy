@@ -1,0 +1,25 @@
+dev tun
+port 1194
+proto udp4
+
+cipher AES-256-CBC
+tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
+
+tls-server
+
+# openssl dhparam -out dh2048.pem 2048
+dh dh2048.pem
+ca ca.crt
+cert server.crt
+key server.key
+
+server 10.99.66.0 255.255.255.0 
+
+push "route 10.0.1.0 255.255.255.0"
+
+comp-lzo
+
+keepalive 10 120
+
+verb 4
+

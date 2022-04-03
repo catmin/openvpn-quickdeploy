@@ -1,0 +1,76 @@
+---
+- name: install openvpn with self-service certificatation authority
+  hosts: all
+  become: true
+  tasks:
+
+  - name: Install openvpn
+    ansible.builtin.apt:
+      name: openvpn
+      state: latest
+
+  - name: Write the openvpn config file
+    ansible.builtin.template:
+      src: server.conf.j2
+      dest: /etc/openvpn/server/server.conf
+
+  - name: Upload CA cert
+    ansible.builtin.copy:
+      src: config/pki/cacert.pem 
+      dest: /etc/openvpn/server/ca.crt
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Upload CA key
+    ansible.builtin.copy:
+      src: config/pki/cakey.pem
+      dest: /etc/openvpn/server/ca.key
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: Upload openvpn cert
+    ansible.builtin.copy:
+      src: config/pki/servercert.pem
+      dest: /etc/openvpn/server/server.crt
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: Upload openvpn key
+    ansible.builtin.copy:
+      src: config/pki/serverkey.pem
+      dest: /etc/openvpn/server/server.key
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: gen-dh
+    ansible.builtin.command:
+      cmd: "openssl dhparam -out /etc/openvpn/server/dh2048.pem 2048"
+      chdir: /etc/openvpn/server
+      creates: /etc/openvpn/server/dh2048.pem
+
+  - name: Write the openvpn cpnfig file
+    ansible.builtin.template:
+      src: server.conf.j2
+      dest: /etc/openvpn/server/server.conf
+
+  - name: Write the nat script file
+    ansible.builtin.template:
+      src: nat.sh 
+      dest: /etc/openvpn/server/nat.sh
+
+  - name: Ensure that openvpn is started
+    ansible.builtin.service:
+      name: 'openvpn-server@server.service'
+      state: restarted
+
+  - name: Enable IP forwarding
+    sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
+
