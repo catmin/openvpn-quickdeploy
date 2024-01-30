@@ -112,7 +112,7 @@ class OpenVpnCa:
     # INIT_SERIAL = 1000
 
     def __init__(self, create_new=False):
-        store = FileStore("/etc/openvpn/server/")
+        store = FileStore("/opt/pki/")
         self.store = store 
         if create_new:
 
@@ -216,7 +216,7 @@ class OpenVpnCa:
         """ vpn endpoint cert """
         cert = crypto.X509()
         cert.set_version(0x2) # version 3
-        cert.get_subject().O = "ITS23"
+        cert.get_subject().O = "ITS25"
         cert.get_subject().CN = cn
         cert.set_serial_number(self.get_next_serial_nr())
         cert.gmtime_adj_notBefore(0)

@@ -9,44 +9,60 @@
       name: openvpn
       state: latest
 
+  - name: create the vpn-self-service-group
+    ansible.builtin.group:
+      name: vpn-self-service
+      state: present
+
+  - name: Add the user 'student'
+    ansible.builtin.user:
+      name: student
+      state: present
+  
+  - name: Set authorized key taken from file
+    ansible.posix.authorized_key:
+      user: student
+      state: present
+      key: "{{ lookup('file', 'id_ed25519.pub') }}"
+
   - name: Add the user 'vpn-self-service'
     ansible.builtin.user:
       name: vpn-self-service
       group: vpn-self-service
       home: /etc/openvpn/server/
+      state: present
 
   - name: Write the openvpn config file
     ansible.builtin.template:
       src: server.conf.j2
       dest: /etc/openvpn/server/server.conf
 
-  - name: Upload CA cert
+  - name: openvpn CA cert
     ansible.builtin.copy:
-      src: pki/cacert.pem 
+      src: /opt/pki/ca.crt 
       dest: /etc/openvpn/server/ca.crt
       owner: root
       group: vpn-self-service
       mode: '0644'
 
-  - name: Upload CA key
-    ansible.builtin.copy:
-      src: pki/cakey.pem
-      dest: /etc/openvpn/server/ca.key
+  - name: CA key
+    ansible.builtin.file:
+      path: /opt/pki/ca.key
       owner: root
       group: vpn-self-service
       mode: '0660'
 
-  - name: Upload openvpn cert
+  - name: openvpn server cert
     ansible.builtin.copy:
-      src: pki/servercert.pem
+      src: /opt/pki/server.crt
       dest: /etc/openvpn/server/server.crt
       owner: root
       group: root
       mode: '0600'
 
-  - name: Upload openvpn key
+  - name: openvpn key
     ansible.builtin.copy:
-      src: pki/serverkey.pem
+      src: /opt/pki/server.key
       dest: /etc/openvpn/server/server.key
       owner: root
       group: root
@@ -76,10 +92,24 @@
       group: root
       mode: '0755'
 
+  - name: set pki directory permissions
+    ansible.builtin.file:
+      path: /opt/pki
+      owner: root 
+      group: vpn-self-service
+      state: directory
+      mode: '0750'
+
   - name: Write the nat script file
     ansible.builtin.template:
       src: nat.sh 
       dest: /etc/openvpn/server/nat.sh
+
+  - name: enable openvpn server in defaults
+    lineinfile:
+      dest: /etc/default/openvpn
+      regexp: '^\AUTOSTART=\".+\"$'
+      line: 'AUTOSTART="all"'
 
   - name: Ensure that openvpn is started
     ansible.builtin.service:
