@@ -189,7 +189,7 @@ class OpenVpnCa:
         """ vpn endpoint cert """
         cert = crypto.X509()
         cert.set_version(0x2) # version 3
-        cert.get_subject().O = "ITS23"
+        cert.get_subject().O = "ITS"
         cert.get_subject().CN = fqdn
         cert.set_serial_number(self.get_next_serial_nr())
         cert.gmtime_adj_notBefore(0)
@@ -216,7 +216,7 @@ class OpenVpnCa:
         """ vpn endpoint cert """
         cert = crypto.X509()
         cert.set_version(0x2) # version 3
-        cert.get_subject().O = "ITS25"
+            cert.get_subject().O = "ITS"
         cert.get_subject().CN = cn
         cert.set_serial_number(self.get_next_serial_nr())
         cert.gmtime_adj_notBefore(0)

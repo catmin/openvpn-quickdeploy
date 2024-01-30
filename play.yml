@@ -9,6 +9,10 @@
       name: openvpn
       state: latest
 
+  - name: Install python openssl pip package
+    ansible.builtin.pip:
+      name: pyopenssl
+
   - name: create the vpn-self-service-group
     ansible.builtin.group:
       name: vpn-self-service
@@ -36,6 +40,14 @@
     ansible.builtin.template:
       src: server.conf.j2
       dest: /etc/openvpn/server/server.conf
+
+  - name: set pki directory permissions
+    ansible.builtin.file:
+      path: /opt/pki
+      owner: root 
+      group: vpn-self-service
+      state: directory
+      mode: '0750'
 
   - name: openvpn CA cert
     ansible.builtin.copy:
@@ -92,14 +104,6 @@
       group: root
       mode: '0755'
 
-  - name: set pki directory permissions
-    ansible.builtin.file:
-      path: /opt/pki
-      owner: root 
-      group: vpn-self-service
-      state: directory
-      mode: '0750'
-
   - name: Write the nat script file
     ansible.builtin.template:
       src: nat.sh 
@@ -111,7 +115,7 @@
       regexp: '^\AUTOSTART=\".+\"$'
       line: 'AUTOSTART="all"'
 
-  - name: Ensure that openvpn is started
+  - name: ensure that openvpn is started
     ansible.builtin.service:
       name: 'openvpn-server@server.service'
       state: restarted
